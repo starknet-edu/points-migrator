@@ -1,14 +1,50 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+from starkware.cairo.common.uint256 import Uint256, uint256_eq, uint256_le
 from contracts.Migrator_storage import tuto_adds, exercises_list, nb_of_exercises
 from contracts.utils.Iplayers_registry import Iplayers_registry
+from contracts.token.ERC20.IERC20 import IERC20
+
+func perform_checks{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        from_add : felt, token_add : felt, own_add : felt, to_add : felt) -> (
+        balance_to_migrate : Uint256):
+    alloc_locals
+    let zero_as_uint256 : Uint256 = Uint256(0, 0)
+    let (allowance : Uint256) = IERC20.allowance(
+        contract_address=token_add, owner=from_add, spender=own_add)
+
+    let (balance_from_address : Uint256) = IERC20.balanceOf(
+        contract_address=token_add, account=from_add)
+
+    with_attr error_message("No points to migrate on this tutorial"):
+        uint_assert_equality(balance_from_address, zero_as_uint256, 0)
+    end
+
+    with_attr error_message("You have to approve the migrator contract"):
+        uint_assert_le(balance_from_address, allowance)
+    end
+
+    let (balance_to_address : Uint256) = IERC20.balanceOf(
+        contract_address=token_add, account=to_add)
+
+    with_attr error_message("This account already has points"):
+        uint_assert_equality(balance_to_address, zero_as_uint256, 1)
+    end
+    return (balance_from_address)
+end
 
 func uint_assert_equality{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         val1 : Uint256, val2 : Uint256, equality : felt) -> ():
     let (uint_equality : felt) = uint256_eq(val1, val2)
     assert uint_equality = equality
+    return ()
+end
+
+func uint_assert_le{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        val1 : Uint256, val2 : Uint256) -> ():
+    let (res : felt) = uint256_le(val1, val2)
+    assert res = 1
     return ()
 end
 
