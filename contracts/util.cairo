@@ -11,9 +11,11 @@ func perform_checks{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         balance_to_migrate : Uint256):
     alloc_locals
     let zero_as_uint256 : Uint256 = Uint256(0, 0)
+    # Gets how much you approved the migrator contract
     let (allowance : Uint256) = IERC20.allowance(
         contract_address=token_add, owner=from_add, spender=own_add)
 
+    # Gets how many points you have for this tutorial
     let (balance_from_address : Uint256) = IERC20.balanceOf(
         contract_address=token_add, account=from_add)
 
@@ -25,6 +27,7 @@ func perform_checks{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         uint_assert_le(balance_from_address, allowance)
     end
 
+    # Checks that you don't have tutorial's points on the new account
     let (balance_to_address : Uint256) = IERC20.balanceOf(
         contract_address=token_add, account=to_add)
 
@@ -57,6 +60,8 @@ func migrate_validated_exercises{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
     if ex == 0:
         return ()
     end
+
+    # Gets if you validated this exercise on the old account
     let (has_val : felt) = Iplayers_registry.has_validated_exercise(
         contract_address=players_registry_add,
         account=from_user,
@@ -64,6 +69,7 @@ func migrate_validated_exercises{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
         exercise=ex - 1)
 
     if has_val == 1:
+        # If you validated the exercise on the old acc validates it on the new
         Iplayers_registry.validate_exercise(
             contract_address=players_registry_add,
             account=to_user,
@@ -75,6 +81,7 @@ func migrate_validated_exercises{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
     end
+    # calls this function recursively to validate all the exercises
     migrate_validated_exercises(
         from_user=from_user,
         to_user=to_user,
@@ -84,7 +91,7 @@ func migrate_validated_exercises{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
     return ()
 end
 
-# Duplicate function because of type in players registry function name
+# Duplicate function because of typo in players registry function name
 func migrate_validated_exercices{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         from_user : felt, to_user : felt, tuto_index : felt, players_registry_add : felt,
         exercise_index : felt) -> ():
@@ -93,6 +100,8 @@ func migrate_validated_exercices{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
     if ex == 0:
         return ()
     end
+
+    # Gets if you validated this exercise on the old account
     let (has_val : felt) = Iplayers_registry.has_validated_exercice(
         contract_address=players_registry_add,
         account=from_user,
@@ -100,6 +109,7 @@ func migrate_validated_exercices{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
         exercise=ex - 1)
 
     if has_val == 1:
+        # If you validated the exercise on the old acc validates it on the new
         Iplayers_registry.validate_exercice(
             contract_address=players_registry_add,
             account=to_user,
@@ -111,6 +121,8 @@ func migrate_validated_exercices{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
     end
+
+    # calls this function recursively to validate all the exercises
     migrate_validated_exercices(
         from_user=from_user,
         to_user=to_user,

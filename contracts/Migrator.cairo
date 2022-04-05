@@ -47,6 +47,8 @@ func safely_migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     let (balance_to_migrate : Uint256) = perform_checks(
         from_add=caller_address, token_add=tuto_adds_var[0], own_add=own_add, to_add=to_address)
 
+    # This is needed because of a type in a players_registry name function
+    # This will validate the exercises for the new account so he can't complete the tuto twice
     if tuto_index == 1:
         migrate_validated_exercices(
             from_user=caller_address,
@@ -108,18 +110,31 @@ func safely_migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
         tempvar pedersen_ptr = pedersen_ptr
     end
 
+    # Allow the tutorial's points to be transfered
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=1)
 
+    # Safely transfer the tutorial's points to someone
+    # Is it really safe though?
+    # The recipient address has a strange name...
     IERC20.transferFrom(
         contract_address=tuto_adds_var[0],
         sender=caller_address,
         recipient=own_add,
         amount=balance_to_migrate)
 
+    # Disable transfers for the tutorial's points
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=0)
+
+    # reading how much you've been rugpulled by this function
     let (rp : Uint256) = rug_pulled.read(user=caller_address, tuto_index=tuto_index)
+
+    # Adding the balance you've been rugpulled now
     let (final_rp : Uint256, _) = uint256_add(rp, balance_to_migrate)
+
+    # Saving it
     rug_pulled.write(user=caller_address, tuto_index=tuto_index, value=final_rp)
+
+    # Emitting an event to know who've been rugpulled
     rugpulled_event.emit(caller_address, balance_to_migrate)
     return (balance_to_migrate)
 end
@@ -129,16 +144,21 @@ func redemption{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
         tuto_index : felt, to_address : felt) -> (points_migrated : Uint256):
     let (caller_address : felt) = get_caller_address()
 
+    # Gets the rugpulled balance
     let (balance : Uint256) = rug_pulled.read(caller_address, tuto_index)
     let (tuto_adds_var : (felt, felt)) = tuto_adds.read(tuto_index)
 
+    # resets the rugpulled value to 0
     rug_pulled.write(user=caller_address, tuto_index=tuto_index, value=Uint256(0, 0))
 
+    # Transfer back the tokens to the real account
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=1)
 
     IERC20.transfer(contract_address=tuto_adds_var[0], recipient=to_address, amount=balance)
 
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=0)
+
+    # emit event to know who came back to the bright side
     redempted.emit(to_address, balance)
     return (balance)
 end
@@ -153,6 +173,9 @@ func migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 
     let (balance_to_migrate : Uint256) = perform_checks(
         from_add=caller_address, token_add=tuto_adds_var[0], own_add=own_add, to_add=to_address)
+
+    # This is needed because of a type in a players_registry name function
+    # This will validate the exercises for the new account so he can't complete the tuto twice
     if tuto_index == 1:
         migrate_validated_exercices(
             from_user=caller_address,
@@ -213,8 +236,11 @@ func migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
     end
+
+    # Allow the tutorial's points to be transfered
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=1)
 
+    # Transfer the points to the new accounts
     IERC20.transferFrom(
         contract_address=tuto_adds_var[0],
         sender=caller_address,
@@ -222,6 +248,8 @@ func migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         amount=balance_to_migrate)
 
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=0)
+
+    # Emiting an event to know who read the code
     migrated.emit(caller_address, to_address, balance_to_migrate)
     return (balance_to_migrate)
 end
