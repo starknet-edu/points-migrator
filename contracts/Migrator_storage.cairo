@@ -20,6 +20,10 @@ end
 func rug_pulled(user : felt, tuto_index : felt) -> (amount : Uint256):
 end
 
+@storage_var
+func can_set_exercises() -> (can_set : felt):
+end
+
 @view
 func tuto_addresses{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         index : felt) -> (tuto_adds : (felt, felt)):

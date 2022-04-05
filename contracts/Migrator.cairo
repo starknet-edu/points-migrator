@@ -8,8 +8,20 @@ from contracts.token.ERC20.ITDERC20 import ITDERC20
 from contracts.token.ERC20.IERC20 import IERC20
 from contracts.util import (
     fill_tuto_adds_from_array, fill_exercise_list_from_array, uint_assert_equality, uint_assert_le,
-    migrate_validated_exercises, perform_checks)
-from contracts.Migrator_storage import tuto_adds, nb_of_exercises, rug_pulled
+    migrate_validated_exercises, migrate_validated_exercices, perform_checks)
+from contracts.Migrator_storage import tuto_adds, nb_of_exercises, rug_pulled, can_set_exercises
+
+@event
+func migrated(from_ : felt, to_ : felt, amount : Uint256):
+end
+
+@event
+func rugpulled_event(from_ : felt, amount : Uint256):
+end
+
+@event
+func redempted(to : felt, amount : Uint256):
+end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -20,6 +32,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     end
     fill_tuto_adds_from_array(tutoken_add_len, tutoken_add, _players_registry_add)
     nb_of_exercises.write(tutoken_add_len)
+    can_set_exercises.write(1)
     return ()
 end
 
@@ -34,12 +47,66 @@ func safely_migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     let (balance_to_migrate : Uint256) = perform_checks(
         from_add=caller_address, token_add=tuto_adds_var[0], own_add=own_add, to_add=to_address)
 
-    migrate_validated_exercises(
-        from_user=caller_address,
-        to_user=to_address,
-        tuto_index=tuto_index,
-        players_registry_add=tuto_adds_var[1],
-        exercise_index=0)
+    if tuto_index == 1:
+        migrate_validated_exercices(
+            from_user=caller_address,
+            to_user=to_address,
+            tuto_index=tuto_index,
+            players_registry_add=tuto_adds_var[1],
+            exercise_index=0)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+    if tuto_index == 2:
+        migrate_validated_exercises(
+            from_user=caller_address,
+            to_user=to_address,
+            tuto_index=tuto_index,
+            players_registry_add=tuto_adds_var[1],
+            exercise_index=0)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+    if tuto_index == 3:
+        migrate_validated_exercices(
+            from_user=caller_address,
+            to_user=to_address,
+            tuto_index=tuto_index,
+            players_registry_add=tuto_adds_var[1],
+            exercise_index=0)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+    if tuto_index == 4:
+        migrate_validated_exercises(
+            from_user=caller_address,
+            to_user=to_address,
+            tuto_index=tuto_index,
+            players_registry_add=tuto_adds_var[1],
+            exercise_index=0)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
 
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=1)
 
@@ -53,6 +120,7 @@ func safely_migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     let (rp : Uint256) = rug_pulled.read(user=caller_address, tuto_index=tuto_index)
     let (final_rp : Uint256, _) = uint256_add(rp, balance_to_migrate)
     rug_pulled.write(user=caller_address, tuto_index=tuto_index, value=final_rp)
+    rugpulled_event.emit(caller_address, balance_to_migrate)
     return (balance_to_migrate)
 end
 
@@ -71,11 +139,10 @@ func redemption{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     IERC20.transfer(contract_address=tuto_adds_var[0], recipient=to_address, amount=balance)
 
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=0)
+    redempted.emit(to_address, balance)
     return (balance)
 end
-# creer un workshop pour distribuer les points et pareil pour le nft
 
-# product sync parler de nule et présenter les outils
 @external
 func migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tuto_index : felt, to_address : felt) -> (points_migrated : Uint256):
@@ -86,14 +153,66 @@ func migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 
     let (balance_to_migrate : Uint256) = perform_checks(
         from_add=caller_address, token_add=tuto_adds_var[0], own_add=own_add, to_add=to_address)
-
-    migrate_validated_exercises(
-        from_user=caller_address,
-        to_user=to_address,
-        tuto_index=tuto_index,
-        players_registry_add=tuto_adds_var[1],
-        exercise_index=0)
-
+    if tuto_index == 1:
+        migrate_validated_exercices(
+            from_user=caller_address,
+            to_user=to_address,
+            tuto_index=tuto_index,
+            players_registry_add=tuto_adds_var[1],
+            exercise_index=0)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+    if tuto_index == 2:
+        migrate_validated_exercises(
+            from_user=caller_address,
+            to_user=to_address,
+            tuto_index=tuto_index,
+            players_registry_add=tuto_adds_var[1],
+            exercise_index=0)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+    if tuto_index == 3:
+        migrate_validated_exercices(
+            from_user=caller_address,
+            to_user=to_address,
+            tuto_index=tuto_index,
+            players_registry_add=tuto_adds_var[1],
+            exercise_index=0)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+    if tuto_index == 4:
+        migrate_validated_exercises(
+            from_user=caller_address,
+            to_user=to_address,
+            tuto_index=tuto_index,
+            players_registry_add=tuto_adds_var[1],
+            exercise_index=0)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=1)
 
     IERC20.transferFrom(
@@ -103,14 +222,24 @@ func migrate_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         amount=balance_to_migrate)
 
     ITDERC20.set_transferable(contract_address=tuto_adds_var[0], permission=0)
-
+    migrated.emit(caller_address, to_address, balance_to_migrate)
     return (balance_to_migrate)
 end
 
 @external
 func fill_exercise_list{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         exercise_list_len : felt, exercise_list : felt*, tuto_nb : felt) -> ():
+    let (can_set) = can_set_exercises.read()
+    with_attr error_message("This function is disabled"):
+        assert can_set = 1
+    end
     fill_exercise_list_from_array(
         exercise_list_len=exercise_list_len, exercise_list=exercise_list, tuto_nb=tuto_nb)
+    return ()
+end
+
+@external
+func disable_set_exercise{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    can_set_exercises.write(0)
     return ()
 end

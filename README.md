@@ -29,3 +29,17 @@ We used [starknet.js v2.5.1](https://github.com/0xs34n/starknet.js/blob/e72b4488
 ## Tests
 
 All the tests are done using hardhat alongside with the starknet devnet
+
+## Usage
+
+To use this script you have to **READ THE CODE** and install the dependencies:
+
+```bash
+npm i
+```
+
+Then copy paste your Argent X `backup.json` file in the `scripts` directory, fill your Argent X password, select the tutorial you want to migrate the points of (or create a loop to migrate them all) and then run the script with:
+
+```bash
+node scripts/migrate.js
+```

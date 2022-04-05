@@ -48,7 +48,44 @@ func uint_assert_le{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return ()
 end
 
+# Duplicate function because of type in players registry function name
 func migrate_validated_exercises{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        from_user : felt, to_user : felt, tuto_index : felt, players_registry_add : felt,
+        exercise_index : felt) -> ():
+    alloc_locals
+    let (ex : felt) = exercises_list.read(tuto_index, exercise_index)
+    if ex == 0:
+        return ()
+    end
+    let (has_val : felt) = Iplayers_registry.has_validated_exercise(
+        contract_address=players_registry_add,
+        account=from_user,
+        workshop=tuto_index,
+        exercise=ex - 1)
+
+    if has_val == 1:
+        Iplayers_registry.validate_exercise(
+            contract_address=players_registry_add,
+            account=to_user,
+            workshop=tuto_index,
+            exercise=ex - 1)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+    end
+    migrate_validated_exercises(
+        from_user=from_user,
+        to_user=to_user,
+        tuto_index=tuto_index,
+        players_registry_add=players_registry_add,
+        exercise_index=exercise_index + 1)
+    return ()
+end
+
+# Duplicate function because of type in players registry function name
+func migrate_validated_exercices{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         from_user : felt, to_user : felt, tuto_index : felt, players_registry_add : felt,
         exercise_index : felt) -> ():
     alloc_locals
@@ -74,7 +111,7 @@ func migrate_validated_exercises{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
     end
-    migrate_validated_exercises(
+    migrate_validated_exercices(
         from_user=from_user,
         to_user=to_user,
         tuto_index=tuto_index,
