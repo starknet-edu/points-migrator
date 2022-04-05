@@ -1,6 +1,6 @@
 # Points migrator
 
-Welcome to the point migrators repo!
+Welcome to the points migrator repo!
 
 ## Context
 
@@ -19,7 +19,7 @@ Ok, no problem! We decided to host an older version of Voyager which was compati
 Nethermind kindly provided us a [docker image](https://github.com/demerzelsolutions/voyager/pkgs/container/voyager) of an old version of voyager. But some more problems appeared:
 
 * The sync would take ~2 weeks
-* After some time running the container, an error appeared and the container goit stuck on it infinitely
+* After some time running the container, an error appeared and the container got stuck on it infinitely
 
 We then decided to create a [small js script](https://github.com/starknet-edu/points-migrator/blob/main/scripts/migrate.js#L34-L50) to enable users using their old account so they would be able to migrate their points (and do anything else they'd like). That solved our problem!
 
@@ -27,10 +27,23 @@ We then decided to create a [small js script](https://github.com/starknet-edu/po
 
 The smart-contract is pretty simple, a user will call the `migrate_points` entrypoint providing the index of the tutorial and the address he wants to migrate the points to. The smart-contract check various things:
 
-* the old account allowance which should be equal to the number of tokens held by this account
+* the old account allowance which should be greater than the number of tokens held by this account
+
+```py
+let (allowance : Uint256) = IERC20.allowance(
+        contract_address=token_add, owner=from_add, spender=own_add)
+
+# Gets how many points you have for this tutorial
+let (balance_from_address : Uint256) = IERC20.balanceOf(
+    contract_address=token_add, account=from_add)
+with_attr error_message("You have to approve the migrator contract"):
+    uint_assert_le(balance_from_address, allowance)
+end
+```
+
 * the new account balance which should be 0
 
-Once these checks are done, the point migrator will transfer the progression of the old account to the new account so the user cannot do the tutorial twice and hold too much tokens. This process is done recursively [here](contracts/util.cairo).
+Once these checks are done, the point migrator will transfer the progression of the old account to the new account so the user cannot do the tutorial twice and hold too many tokens. This process is done recursively [here](contracts/util.cairo).
 
 ## Starknet.js
 
