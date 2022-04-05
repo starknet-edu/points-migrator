@@ -2,7 +2,8 @@ const ethers = require("ethers");
 const fs = require("fs");
 const starknet = require("starknet");
 
-const MIGRATOR_ADDRESS = "";
+const MIGRATOR_ADDRESS =
+  "0x0135ad3e5755dfa3321a7ef58231577d0d932322acd4d2e39714b6fe83a54d30";
 
 const params = {
   cairo101: {
