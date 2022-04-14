@@ -28,8 +28,6 @@ const params = {
   },
 };
 
-const SENDER_POINTS_TO = "";
-
 async function migratePoints(password, tutoParams) {
   // read your argent backup file
   const backup = fs.readFileSync("scripts/mockBackup.json", "utf-8");
@@ -72,6 +70,8 @@ async function migratePoints(password, tutoParams) {
   console.log(tx2);
   await starknet.defaultProvider.waitForTx(tx2.transaction_hash);
 }
+// replace with the address you want to migrate your points
+const SENDER_POINTS_TO = "";
 
 // replace with your argent x password so the backup file can be decoded
 const password = "";
